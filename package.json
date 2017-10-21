@@ -1,0 +1,22 @@
+{
+  "name": "app-server",
+  "version": "1.0.0",
+  "description": "Yelp-Alytics Service which receives yelp queries from user and sends back lists of restaurants. ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/git-reset-hard/app-server.git"
+  },
+  "author": "Daniel Dai",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/git-reset-hard/app-server/issues"
+  },
+  "homepage": "https://github.com/git-reset-hard/app-server#readme",
+  "dependencies": {
+    "elasticsearch": "^13.3.1"
+  }
+}
