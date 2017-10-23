@@ -4,7 +4,8 @@
   "description": "Yelp-Alytics Service which receives yelp queries from user and sends back lists of restaurants. ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --inspect server/index.js",
+    "test": "mocha --bail --reporter nyan specs/server.js;"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,17 @@
   },
   "homepage": "https://github.com/git-reset-hard/app-server#readme",
   "dependencies": {
+    "assert": "^1.4.1",
+    "body-parser": "^1.18.2",
+    "chai": "^4.1.2",
     "elasticsearch": "^13.3.1",
-    "faker": "^4.1.0"
+    "express": "^4.16.2",
+    "faker": "^4.1.0",
+    "http": "0.0.0",
+    "mocha": "^4.0.1",
+    "mysql": "^2.15.0",
+    "mysql2": "^1.4.2",
+    "request": "^2.83.0",
+    "sequelize": "^4.17.0"
   }
 }
