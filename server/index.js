@@ -3,6 +3,7 @@ const app = express();
 const server = require('http').Server(app);
 const bodyParser = require('body-parser');
 const request = require('request');
+const rp = require('request-promise-native');
 const port = process.env.PORT || 2424;
 const restaurantList = require('./database/restaurantdb.js');
 const appServerDB = require('./database/mysql.js');
@@ -35,20 +36,19 @@ app.get('/searchRestaurants', (req, res) => {
           'json': true,
         };
         //else MAKE POST request to recommendations engine
-        request(options, (err, response, body) => {
-          if (err) {
-            console.log ('there was an error posting to recommendations engine ', err);
-          }
-          console.log('we got a response back! ', body);
-          //return list of restaurants
-          //do stuff with body
-          //send copy to database with query
-          //send copy and query to analytics
-          //query restaurantDB with the list and generate real list of restaurants
-          //send full list of restaurant details back to client
-          res.status(200);
-          res.send('Sending back list');
-        });
+        return rp(options);
+      })
+      .then((list) => {
+        console.log('we got a response back! ', list);
+        //return list of restaurants
+        //do stuff with body
+        //send copy to database with query
+        //send copy and query to analytics
+        //query restaurantDB with the list and generate real list of restaurants
+        //send full list of restaurant details back to client
+        res.status(200);
+        res.send('Sending back list');
+
       })
       .catch((err) => {
         console.log('no user found ', err);
