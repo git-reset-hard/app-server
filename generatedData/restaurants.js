@@ -1,15 +1,20 @@
+//this file generates fake restaurant data and populates the restaurants MySQL table
+
+
 const faker = require('faker');
+const db = require('../server/database/mysql.js');
+const shortid = require('shortid');
 
 faker.seed(123);
 
 let restaurantArr = [];
 
-for (let i = 0; i < 10000000; i++) {
+for (let i = 0; i < 10000; i++) {
   let restaurantId = i;
   let restaurantName = faker.fake('{{company.catchPhraseAdjective}} {{company.bsAdjective}} {{company.bsNoun}}');
   let address = faker.fake('{{address.streetAddress}} {{address.streetName}} {{address.streetSuffix}}');
   let city = faker.fake('{{address.cityPrefix}} {{address.city}}');
-  let zipcode = faker.fake('{{address.zipCode}}');
+  let zipcode = '972' + Math.floor(Math.random() * 90 + 10);
   let phone = faker.fake('{{phone.phoneNumber}}');
   let priceRange = Math.ceil(Math.random() * 4);
   let stars = Math.ceil(Math.random() * 5);
@@ -21,8 +26,9 @@ for (let i = 0; i < 10000000; i++) {
     tags += tag + ' ';
   }
   let restaurantObj = {
-    restaurantId: restaurantId,
-    restaurantName: restaurantName,
+    id: shortid.generate(),
+    index: i,
+    name: restaurantName,
     address: address,
     city: city,
     zipcode: zipcode,
@@ -34,5 +40,11 @@ for (let i = 0; i < 10000000; i++) {
   restaurantArr.push(restaurantObj);
 }
 
-console.log(restaurantArr);
+db.Restaurant.bulkCreate(restaurantArr)
+  .then(()=> {
+    console.log('restaurants created');
+  })
+  .catch((err) => {
+    console.log('something wrong ', err);
+  });
 

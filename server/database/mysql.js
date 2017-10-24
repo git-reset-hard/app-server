@@ -9,7 +9,8 @@ if (process.env.DATABASE_URL) {
     username: 'student',
     password: 'student',
     dialect: 'mysql',
-    logging: false
+    logging: false,
+    operatorsAliases: false
   });
 }
 
@@ -21,122 +22,118 @@ db.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-// //Manager Audit History Schema
-// const ManagerAudit = db.define('manageraudit', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   type: Sequelize.STRING
-// });
 
-// //Manager Schema
-// const Manager = db.define('manager', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   username: Sequelize.STRING,
-//   passwordHash: Sequelize.STRING,
-//   passwordSalt: Sequelize.STRING,
-//   // restaurantId: Sequelize.INTEGER
-// });
+//User Schema
+const User = db.define('user', {
+  id: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  },
+  index: Sequelize.INTEGER,
+  name: Sequelize.STRING,
+  getsPersonalized: Sequelize.BOOLEAN
+}, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['id']
+    }
+  ]
+});
 
-// //Customer Schema
-// const Customer = db.define('customer', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   name: Sequelize.STRING,
-//   address: Sequelize.STRING,
-//   mobile: {
-//     type: Sequelize.STRING,
-//     unique: true,
-//     allowNull: false
-//   },
-//   email: Sequelize.STRING
-// });
+//Queries Schema
+const Query = db.define('query', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  searchTerm: Sequelize.STRING,
+  location: Sequelize.INTEGER
+}, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['id']
+    }
+  ]
+});
 
-// //Queue Schema
-// const Queue = db.define('queue', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   size: Sequelize.INTEGER,
-//   wait: {
-//     type: Sequelize.INTEGER,
-//     defaultValue: 0
-//   },
-//   position: Sequelize.INTEGER
-// });
+//List Schema
+const List = db.define('list', {
+  id: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  },
+  index: Sequelize.INTEGER,
+  isPersonalized: Sequelize.BOOLEAN,
+  restaurantID_1: Sequelize.INTEGER,
+  restaurantID_2: Sequelize.INTEGER,
+  restaurantID_3: Sequelize.INTEGER,
+  restaurantID_4: Sequelize.INTEGER,
+  restaurantID_5: Sequelize.INTEGER,
+  restaurantID_6: Sequelize.INTEGER,
+  restaurantID_7: Sequelize.INTEGER,
+  restaurantID_8: Sequelize.INTEGER,
+  restaurantID_9: Sequelize.INTEGER,
+  restaurantID_10: Sequelize.INTEGER
+}, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['id']
+    }
+  ]
+});
 
-// //Restaurant Schema
-// const Restaurant = db.define('restaurant', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     primaryKey: true,
-//     autoIncrement: true
-//   },
-//   name: Sequelize.STRING,
-//   address: Sequelize.STRING,
-//   phone: {
-//     type: Sequelize.STRING,
-//     unique: true,
-//     allowNull: false
-//   },
-//   nextPosition: {
-//     type: Sequelize.INTEGER,
-//     defaultValue: 0
-//   },
-//   'total_wait': {
-//     type: Sequelize.INTEGER,
-//     defaultValue: 0
-//   },
-//   'average_wait': {
-//     type: Sequelize.INTEGER,
-//     defaultValue: 0
-//   },
-//   status: Sequelize.STRING,
+//Restaurant schema
+const Restaurant = db.define('restaurant', {
+  id: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  },
+  index: Sequelize.INTEGER,
+  name: Sequelize.STRING,
+  address: Sequelize.STRING,
+  city: Sequelize.STRING,
+  zipcode: Sequelize.STRING,
+  phone: Sequelize.STRING,
+  priceRange: Sequelize.INTEGER,
+  stars: Sequelize.INTEGER,
+  tags: Sequelize.STRING
+}, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['id']
+    }
+  ]
+});
 
-//   image: Sequelize.STRING,
-//   tables: Sequelize.TEXT,
-//   managerId: Sequelize.INTEGER,
-//   hours: Sequelize.TEXT,
-// });
 
-// // Relationship between Restaurant & Queue
-// Restaurant.hasMany(Queue);
-// Queue.belongsTo(Restaurant);
+//Relationship between User & Query
+User.hasMany(Query);
+Query.belongsTo(User);
 
-// //Relationship between Customer & Queue
-// Customer.hasOne(Queue);
-// Queue.belongsTo(Customer);
+//Relationship between Query & List
+List.hasOne(Query);
+Query.belongsTo(List);
 
-// //Relationship between Manager & ManagerAudit
-// Manager.hasOne(ManagerAudit);
-// ManagerAudit.belongsTo(Manager);
+//Relationship between Restaurant & List
+Restaurant.hasMany(List);
+List.belongsTo(Restaurant);
 
-// // add manager id to restaurant
-// Restaurant.belongsTo(Manager);
-
-// Customer.sync()
-//   .then(() => Restaurant.sync())
-//   .then(() => Queue.sync())
-//   // .then(() => Manager.sync())
-//   .catch(error => console.log('error syncing data', error));
+User.sync()
+  .then(() => Restaurant.sync())
+  .then(() => List.sync())
+  .then(() => Query.sync())
+  .catch(error => console.log('error syncing data', error));
 
 module.exports = {
 //   Sequelize: Sequelize,
-  db: db
-//   Customer: Customer,
-//   Queue: Queue,
-//   Restaurant: Restaurant,
-//   Manager: Manager,
-//   ManagerAudit: ManagerAudit
+  db: db,
+  User: User,
+  Query: Query,
+  List: List,
+  Restaurant: Restaurant
 };

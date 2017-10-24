@@ -22,12 +22,41 @@ app.get('/searchRestaurants', (req, res) => {
   //check to make sure query parameters are valid
   if (req.query.searchTerm || req.query.location || req.query.userId) {
     //check userId against database to see if generic list or personalized list will be served
+    appServerDB.User.findById(req.query.userId)
+      .then((user) => {
+        let options = {
+          'method': 'POST',
+          'uri': 'http://127.0.0.1:2425/recommendationsEngine',
+          'body': {
+            userId: req.query.userId,
+            searchTerm: req.query.searchTerm,
+            location: req.query.location
+          },
+          'json': true,
+        };
+        console.log('making a POST', options);
+        request(options, (err, response, body) => {
+          if (err) {
+            console.log ('there was an error posting to recommendations engine ', err);
+          }
+          console.log('we got a response back! ', body);
+          //do stuff with body
+          //send copy to database with query
+          //query restaurantDB with the list and generate real list of restaurants
+          //send full list of restaurant details back to client
+          res.status(200);
+          res.send('Sending back list');
+        });
+      })
+      .catch((err) => {
+        console.log('no user found ', err);
+        res.status(400);
+        res.send('no user found');
+      });
     //if generic-- query elasticsearch restaurant list and come up with list
     //else MAKE POST request to recommendations engine
 
     //return list of restaurants
-    res.status(200);
-    res.send('Sending back list');
 
     //store query to database along with list
     //send to analytics for storage

@@ -33,7 +33,7 @@ describe('Server HTTP requests', function () {
       'qs': {
         searchTerm: 'mexican',
         location: '94582',
-        userId: '888'
+        userId: 'Sy_qKepnLenpZ'
       }
     };
     request(options, function (err, res, body) {
@@ -56,6 +56,8 @@ describe('Server HTTP requests', function () {
       done();
     });
   });
+
+
 
 });
 
