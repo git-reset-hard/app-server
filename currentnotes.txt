@@ -1,0 +1,12 @@
+working on:
+-creating restaurants with meaningful zip code locations
+  -should restaurants be clustered around major cities?
+-create queries to elasticsearch?
+
+Set up node.js express server
+-figure out all inputs and outputs
+-write tests to server
+
+Set up MySQL database to store queries and lists
+
+Generate fake queries to hit the express server
