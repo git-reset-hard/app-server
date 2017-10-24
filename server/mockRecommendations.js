@@ -12,6 +12,7 @@ const restaurantList = require('./database/restaurantdb.js');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+//might refactor this at some point to utilize elasticsearch built in promises
 let getRandomRestaurant = () => {
   let a = new Date().getTime().toString();
   return new Promise((resolve, reject) => {
