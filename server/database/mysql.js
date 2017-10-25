@@ -44,12 +44,12 @@ const User = db.define('user', {
 //Queries Schema
 const Query = db.define('query', {
   id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
+    type: Sequelize.STRING,
     primaryKey: true
   },
   searchTerm: Sequelize.STRING,
-  location: Sequelize.INTEGER
+  location: Sequelize.INTEGER,
+  servedList: Sequelize.STRING
 }, {
   indexes: [
     {
@@ -65,18 +65,17 @@ const List = db.define('list', {
     type: Sequelize.STRING,
     primaryKey: true
   },
-  index: Sequelize.INTEGER,
   isPersonalized: Sequelize.BOOLEAN,
-  restaurantID_1: Sequelize.INTEGER,
-  restaurantID_2: Sequelize.INTEGER,
-  restaurantID_3: Sequelize.INTEGER,
-  restaurantID_4: Sequelize.INTEGER,
-  restaurantID_5: Sequelize.INTEGER,
-  restaurantID_6: Sequelize.INTEGER,
-  restaurantID_7: Sequelize.INTEGER,
-  restaurantID_8: Sequelize.INTEGER,
-  restaurantID_9: Sequelize.INTEGER,
-  restaurantID_10: Sequelize.INTEGER
+  restaurantID_1: Sequelize.STRING,
+  restaurantID_2: Sequelize.STRING,
+  restaurantID_3: Sequelize.STRING,
+  restaurantID_4: Sequelize.STRING,
+  restaurantID_5: Sequelize.STRING,
+  restaurantID_6: Sequelize.STRING,
+  restaurantID_7: Sequelize.STRING,
+  restaurantID_8: Sequelize.STRING,
+  restaurantID_9: Sequelize.STRING,
+  restaurantID_10: Sequelize.STRING
 }, {
   indexes: [
     {
@@ -86,29 +85,6 @@ const List = db.define('list', {
   ]
 });
 
-//Restaurant schema
-const Restaurant = db.define('restaurant', {
-  id: {
-    type: Sequelize.STRING,
-    primaryKey: true
-  },
-  index: Sequelize.INTEGER,
-  name: Sequelize.STRING,
-  address: Sequelize.STRING,
-  city: Sequelize.STRING,
-  zipcode: Sequelize.STRING,
-  phone: Sequelize.STRING,
-  priceRange: Sequelize.INTEGER,
-  stars: Sequelize.INTEGER,
-  tags: Sequelize.STRING
-}, {
-  indexes: [
-    {
-      unique: true,
-      fields: ['id']
-    }
-  ]
-});
 
 
 //Relationship between User & Query
@@ -119,12 +95,8 @@ Query.belongsTo(User);
 List.hasOne(Query);
 Query.belongsTo(List);
 
-//Relationship between Restaurant & List
-Restaurant.hasMany(List);
-List.belongsTo(Restaurant);
 
 User.sync()
-  .then(() => Restaurant.sync())
   .then(() => List.sync())
   .then(() => Query.sync())
   .catch(error => console.log('error syncing data', error));
@@ -134,6 +106,5 @@ module.exports = {
   db: db,
   User: User,
   Query: Query,
-  List: List,
-  Restaurant: Restaurant
+  List: List
 };
