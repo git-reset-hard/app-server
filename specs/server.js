@@ -25,20 +25,40 @@ describe('Server HTTP requests', function () {
   });
 
 
-  it ('make GET with query terms to /searchRestaurants', function(done) {
+  it ('make GET with query to /searchRestaurants with generic list user', function(done) {
 
     let options = {
       'method': 'GET',
       'uri': 'http://127.0.0.1:2424/searchRestaurants',
       'qs': {
-        searchTerm: 'mexican',
-        location: '94582',
-        userId: 'Sy_qKepnLenpZ'
+        searchTerm: 'aliquid',
+        location: '97291',
+        userId: 'Sy_TNOmb8p6W'
       }
     };
     request(options, function (err, res, body) {
-      
-      console.log('this is back from request', body);
+      let list = JSON.parse(body);
+      console.log(list);
+      //expect(list.customized).to.equal(false);
+      expect(res.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  it ('make GET with query to /searchRestaurants with personalized list user', function(done) {
+
+    let options = {
+      'method': 'GET',
+      'uri': 'http://127.0.0.1:2424/searchRestaurants',
+      'qs': {
+        searchTerm: 'aliquid',
+        location: '97291',
+        userId: 'Sy_l7ZuQWLapW'
+      }
+    };
+    request(options, function (err, res, body) {
+      let list = JSON.parse(body);
+      //expect(list.customized).to.equal(true);
       expect(res.statusCode).to.equal(200);
       done();
     });
@@ -56,9 +76,6 @@ describe('Server HTTP requests', function () {
       done();
     });
   });
-
-
-
 });
 
 

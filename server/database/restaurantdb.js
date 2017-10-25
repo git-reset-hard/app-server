@@ -1,21 +1,20 @@
 const elasticsearch = require('elasticsearch');
 
 const client = new elasticsearch.Client({
-  host: 'https://search-yelpalytics-appserver-4kvoj4c5vzy22aztu2kzph7mna.us-west-1.es.amazonaws.com/',
-  log: 'trace'
+  host: 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.amazonaws.com/'
 });
 
 
-client.ping({
-  // ping usually has a 3000ms timeout
-  requestTimeout: 1000
-}, function (error) {
-  if (error) {
-    console.trace('elasticsearch cluster is down!');
-  } else {
-    console.log('All is well');
-  }
-});
+// client.ping({
+//   // ping usually has a 3000ms timeout
+//   requestTimeout: 1000
+// }, function (error) {
+//   if (error) {
+//     console.trace('elasticsearch cluster is down!');
+//   } else {
+//     console.log('All is well');
+//   }
+// });
 
 
 // client.create({
@@ -43,10 +42,10 @@ client.ping({
 
 // client.search({
 //   index: 'restaurant',
-//   q: 'tags:mexican'
+//   q: 'tags:ipsum'
 // })
 //   .then((response) => {
-//     console.log('query successful ', response);
+//     console.log('query successful ', response.hits.hits[9]);
 //   })
 //   .catch((err) => {
 //     console.log('query error ', error);
