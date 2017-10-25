@@ -69,7 +69,8 @@ const handleQuery = function (req, res) {
       };
       appServerDB.Query.create(queryObj);
 
-      //send copy and query to analytics and customer profiling
+      //---------------TODO: send copy and query to analytics and customer profiling--------------------------------
+
       let restaurantArr = [];
 
       let queryMethod = {
@@ -89,6 +90,7 @@ const handleQuery = function (req, res) {
         restaurantArr.push(queryBody);
       }
       
+      //query restaurantDB with the list and generate real list of restaurants
       restaurantList.msearch({
         body: restaurantArr
       })
@@ -97,23 +99,19 @@ const handleQuery = function (req, res) {
           for (var i in restaurants.responses) {
             restaurantList.push(restaurants.responses[i].hits.hits[0]._source);
           }
+          //send full list of restaurant details back to client
           res.status(200);
           res.send(restaurantList);
         })
         .catch((err) => {
           console.log('problem querying restaurants ', err);
         });
-      //query restaurantDB with the list and generate real list of restaurants
-      //send full list of restaurant details back to client
-
-
     })
     .catch((err) => {
       console.log('error with query ', err);
       res.status(400);
       res.send('no user found');
     });
-  //if generic-- query elasticsearch restaurant list and come up with list
 };
 
 module.exports = handleQuery;
