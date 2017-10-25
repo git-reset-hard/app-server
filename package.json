@@ -19,6 +19,7 @@
   "homepage": "https://github.com/git-reset-hard/app-server#readme",
   "dependencies": {
     "assert": "^1.4.1",
+    "aws-sdk": "^2.140.0",
     "body-parser": "^1.18.2",
     "chai": "^4.1.2",
     "elasticsearch": "^13.3.1",

@@ -9,6 +9,10 @@ const restaurantList = require('./database/restaurantdb.js');
 const appServerDB = require('./database/mysql.js');
 const handleQuery = require('./controller/queryHandler.js');
 
+// import entire SDK
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('./config.json');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
