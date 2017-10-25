@@ -11,12 +11,15 @@ let users = [];
 for (let i = 0; i < 10000; i++) {
   let name = faker.fake('{{name.firstName}} {{name.lastName}}');
   let getsPersonalized = (Math.random() >= 0.5);
+
+  //pull real zipcode from zipcode file
   
   let userObj = {
     id: shortid.generate(),
     index: i,
     name: name,
-    getsPersonalized: getsPersonalized
+    getsPersonalized: getsPersonalized,
+    hometown: zipcode
   };
   users.push(userObj);
 }

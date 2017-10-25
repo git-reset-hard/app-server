@@ -23,12 +23,14 @@ db.authenticate()
   });
 
 
+
 //User Schema
 const User = db.define('user', {
   id: {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  numericalIndex: Sequelize.INTEGER,
   index: Sequelize.INTEGER,
   name: Sequelize.STRING,
   getsPersonalized: Sequelize.BOOLEAN
@@ -47,6 +49,7 @@ const Query = db.define('query', {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  numericalIndex: Sequelize.INTEGER,
   searchTerm: Sequelize.STRING,
   location: Sequelize.INTEGER,
   servedList: Sequelize.STRING
@@ -65,6 +68,7 @@ const List = db.define('list', {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  numericalIndex: Sequelize.INTEGER,
   isPersonalized: Sequelize.BOOLEAN,
   restaurantID_1: Sequelize.STRING,
   restaurantID_2: Sequelize.STRING,
