@@ -30,9 +30,9 @@ const User = db.define('user', {
     type: Sequelize.STRING,
     primaryKey: true
   },
-  numericalIndex: Sequelize.INTEGER,
   index: Sequelize.INTEGER,
   name: Sequelize.STRING,
+  hometown: Sequelize.INTEGER,
   getsPersonalized: Sequelize.BOOLEAN
 }, {
   indexes: [
@@ -49,10 +49,12 @@ const Query = db.define('query', {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  userId: Sequelize.STRING,
   numericalIndex: Sequelize.INTEGER,
   searchTerm: Sequelize.STRING,
   location: Sequelize.INTEGER,
-  servedList: Sequelize.STRING
+  servedList: Sequelize.STRING,
+  date: Sequelize.DATE
 }, {
   indexes: [
     {
@@ -92,12 +94,12 @@ const List = db.define('list', {
 
 
 //Relationship between User & Query
-User.hasMany(Query);
-Query.belongsTo(User);
+// User.hasMany(Query);
+// Query.belongsTo(User);
 
 //Relationship between Query & List
-List.hasOne(Query);
-Query.belongsTo(List);
+// List.hasOne(Query);
+// Query.belongsTo(List);
 
 
 User.sync()
