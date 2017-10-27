@@ -22,7 +22,7 @@ curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.am
     }
 }'
 
-curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.amazonaws.com/querytracker?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.amazonaws.com/querylogs?pretty' -H 'Content-Type: application/json' -d'
  {
      "settings" : {
          "number_of_shards" : 1

@@ -11,7 +11,7 @@ const handleQuery = require('./controller/queryHandler.js');
 const fs = require('fs');
 const shortid = require('shortid');
 
-const LOG_FILE = './logs/10-26-17.log';
+const LOG_FILE = './logs/log.log';
 // import entire SDK
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath('./config/config.json');
@@ -34,6 +34,7 @@ app.get('/searchRestaurants', (req, res) => {
       type: 'log',
       time: startTime,
       process: 'initiate',
+      elapsed: new Date() - startTime,
       action: '',
       success: true,
       logid: logid,

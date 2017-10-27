@@ -5,7 +5,7 @@ const appServerDB = require('../database/mysql.js');
 const shortid = require('shortid');
 const fs = require('fs');
 
-const LOG_FILE = './logs/10-26-17.log';
+const LOG_FILE = './logs/log.log';
 
 const handleQuery = function (req, res) {
   //check userId against database to see if generic list or personalized list will be served
@@ -14,7 +14,8 @@ const handleQuery = function (req, res) {
       if (user === null) {
         let log = {
           type: 'log',
-          time: new Date() - req.query.startTime,
+          time: new Date(),
+          elapsed: new Date() - req.query.startTime,
           process: 'userReturn',
           action: 'failed user lookup',
           success: false,
@@ -26,7 +27,8 @@ const handleQuery = function (req, res) {
 
         let log = {
           type: 'log',
-          time: new Date() - req.query.startTime,
+          time: new Date(),
+          elapsed: new Date() - req.query.startTime,
           process: 'userReturn',
           action: '',
           success: true,
@@ -62,7 +64,8 @@ const handleQuery = function (req, res) {
 
         let log2 = {
           type: 'log',
-          time: new Date() - req.query.startTime,
+          time: new Date(),
+          elapsed: new Date() - req.query.startTime,
           process: 'getList',
           action: 'send to recommendations',
           success: true,
@@ -75,7 +78,8 @@ const handleQuery = function (req, res) {
 
         let log = {
           type: 'log',
-          time: new Date() - req.query.startTime,
+          time: new Date(),
+          elapsed: new Date() - req.query.startTime,
           process: 'userReturn',
           action: '',
           success: true,
@@ -101,7 +105,8 @@ const handleQuery = function (req, res) {
 
         let log2 = {
           type: 'log',
-          time: new Date() - req.query.startTime,
+          time: new Date(),
+          elapsed: new Date() - req.query.startTime,
           process: 'getList',
           action: 'query for generic list',
           success: true,
@@ -127,7 +132,8 @@ const handleQuery = function (req, res) {
 
             let log = {
               type: 'log',
-              time: new Date() - req.query.startTime,
+              time: new Date(),
+              elapsed: new Date() - req.query.startTime,
               process: 'getList',
               action: 'compiling list',
               success: true,
@@ -152,7 +158,8 @@ const handleQuery = function (req, res) {
     .then((list) => {
       let log = {
         type: 'log',
-        time: new Date() - req.query.startTime,
+        time: new Date(),
+        elapsed: new Date() - req.query.startTime,
         process: 'getList',
         action: 'lists returned',
         success: true,
@@ -167,7 +174,8 @@ const handleQuery = function (req, res) {
 
       let log2 = {
         type: 'log',
-        time: new Date() - req.query.startTime,
+        time: new Date(),
+        elapsed: new Date() - req.query.startTime,
         process: 'compile restaurants',
         action: 'sending list to get restaurant details',
         success: true,
@@ -218,10 +226,11 @@ const handleQuery = function (req, res) {
 
           let log = {
             type: 'log',
-            time: new Date() - req.query.startTime,
+            time: new Date(),
+            elapsed: new Date() - req.query.startTime,
             process: 'complete query',
             action: 'send list back to user',
-            success: false,
+            success: true,
             logid: req.query.logid
           };
           fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
@@ -232,7 +241,8 @@ const handleQuery = function (req, res) {
         .catch((err) => {
           let log = {
             type: 'log',
-            time: new Date() - req.query.startTime,
+            time: new Date(),
+            elapsed: new Date() - req.query.startTime,
             process: 'compile restaurants',
             action: 'problem querying restaurants from ElasticSearch',
             success: false,

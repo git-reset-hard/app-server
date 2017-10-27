@@ -6,26 +6,26 @@ const rp = require('request-promise-native');
 const faker = require('faker');
 faker.seed(123);
 
-// let categories = fs.readFileSync('./categories.json').toString();
-// categories = JSON.parse(categories);
+let categories = fs.readFileSync('./categories.json').toString();
+categories = JSON.parse(categories);
 
-// let restaurantCats = [];
-// for (let i in categories) {
-//   for (let j in categories[i].parents) {
-//     if (categories[i].parents[j] === 'restaurants') {
-//       for (let z = 0; z < Math.floor(Math.random() * 4); z++) {
-//         restaurantCats.push(categories[i].alias);
-//       }
-//     }
-//   }
-// }
+let restaurantCats = [];
+for (let i in categories) {
+  for (let j in categories[i].parents) {
+    if (categories[i].parents[j] === 'restaurants') {
+      for (let z = 0; z < Math.floor(Math.random() * 4); z++) {
+        restaurantCats.push(categories[i].alias);
+      }
+    }
+  }
+}
 
 const randomDate = function(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
 const generateQuery = function (count) {
-  if (count > 2000) {
+  if (count > 10000) {
     return;
   }
   count++;
@@ -43,8 +43,8 @@ const generateQuery = function (count) {
       let random = Math.floor(Math.random() * number);
       
       let date = randomDate(new Date(2017, 6, 1), new Date());
-      //let randomQuery = restaurantCats[Math.floor(Math.random() * 221)];
-      let randomQuery = faker.fake('{{lorem.word}}');
+      let randomQuery = restaurantCats[Math.floor(Math.random() * restaurantCats.length)];
+
 
       let query = {
         id: shortid.generate(),
