@@ -17,3 +17,7 @@ Generate fake queries to hit the express server
 
 
 Tests to write
+
+
+http://ows.mundialis.de/services/service?
+TOPO-OSM-WMS

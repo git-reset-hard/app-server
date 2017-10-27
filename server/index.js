@@ -8,8 +8,10 @@ const port = process.env.PORT || 2424;
 const restaurantList = require('./database/restaurantdb.js');
 const appServerDB = require('./database/mysql.js');
 const handleQuery = require('./controller/queryHandler.js');
+const fs = require('fs');
+const shortid = require('shortid');
 
-
+const LOG_FILE = './logs/10-26-17.log';
 // import entire SDK
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath('./config/config.json');
@@ -26,7 +28,19 @@ app.get('/', (req, res) => {
 app.get('/searchRestaurants', (req, res) => {
   //check to make sure query parameters are valid
   if (req.query.searchTerm || req.query.location || req.query.userId) {
-    
+    let logid = shortid.generate();
+    let startTime = new Date();
+    let log = {
+      type: 'log',
+      time: startTime,
+      process: 'initiate',
+      action: '',
+      success: true,
+      logid: logid,
+    };
+    fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+    req.query.logid = logid;
+    req.query.startTime = startTime;
     handleQuery(req, res);
 
   } else {

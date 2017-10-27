@@ -33,6 +33,8 @@ const User = db.define('user', {
   index: Sequelize.INTEGER,
   name: Sequelize.STRING,
   hometown: Sequelize.INTEGER,
+  lat: Sequelize.INTEGER,
+  long: Sequelize.INTEGER,
   getsPersonalized: Sequelize.BOOLEAN
 }, {
   indexes: [
