@@ -33,7 +33,7 @@ describe('Server HTTP requests', function () {
       'qs': {
         searchTerm: 'aliquid',
         location: '97291',
-        userId: 'Sy_TNOmb8p6W'
+        userId: 'Sy__W-f0h10W'
       }
     };
     request(options, function (err, res, body) {
@@ -53,7 +53,7 @@ describe('Server HTTP requests', function () {
       'qs': {
         searchTerm: 'aliquid',
         location: '97291',
-        userId: 'Sy_l7ZuQWLapW'
+        userId: 'Sy__Tbf0ohyA-'
       }
     };
     request(options, function (err, res, body) {

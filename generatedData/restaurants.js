@@ -8,28 +8,57 @@ const fs = require('fs');
 
 faker.seed(123);
 
+let categories = fs.readFileSync('./categories.json').toString();
+categories = JSON.parse(categories);
+
+let restaurantCats = [];
+for (let i in categories) {
+  for (let j in categories[i].parents) {
+    if (categories[i].parents[j] === 'restaurants') {
+      for (let z = 0; z < Math.floor(Math.random() * 4); z++) {
+        restaurantCats.push(categories[i].alias);
+      }
+    }
+  }
+}
+
+let zipcodes = fs.readFileSync('./zipcodes.js').toString();
+zipcodes = JSON.parse(zipcodes);
+
+let populated = [];
+for (let i in zipcodes) {
+  if (zipcodes[i].EstimatedPopulation > 1000 && zipcodes[i].Zipcode > 10000) {
+    populated.push(zipcodes[i]);
+  }
+}
+
+
 
 const makeRestaurant = function(count = 1) {
   //this count determines how many rounds of 10k inserts will be done
-  if (count === 10) {
+  if (count === 100) {
     return;
   }
 
   let restaurantArr = [];
 
   for (let i = 0; i < 10000; i++) {
+
+    var randomIndex = Math.random();
+    var randomIndex1 = Math.random();
     let restaurantName = faker.fake('{{company.catchPhraseAdjective}} {{company.bsAdjective}} {{company.bsNoun}}');
     let address = faker.fake('{{address.streetAddress}} {{address.streetName}} {{address.streetSuffix}}');
     let city = faker.fake('{{address.cityPrefix}} {{address.city}}');
-    let zipcode = '972' + Math.floor(Math.random() * 90 + 10);
+    let zipcode = populated[Math.floor(randomIndex * populated.length)].Zipcode;
     let phone = faker.fake('{{phone.phoneNumber}}');
-    let priceRange = Math.ceil(Math.random() * 4);
-    let stars = Math.ceil(Math.random() * 5);
-    let numberTags = Math.ceil(Math.random() * 10);
+    let priceRange = Math.ceil(randomIndex * 4);
+    let stars = Math.ceil(randomIndex1 * 5);
+    let numberTags = Math.ceil(randomIndex * 10);
     let tags = '';
     
     for (let j = 0; j < numberTags; j++) {
-      let tag = faker.fake('{{lorem.word}}');
+      let index = Math.floor(randomIndex * restaurantCats.length);
+      let tag = restaurantCats[index];
       tags += tag + ' ';
     }
     let restaurantObj = {
@@ -61,7 +90,6 @@ const makeRestaurant = function(count = 1) {
     .then(() => {
       console.log('insertion finished round ', count);
       count++;
-      //recursively call makeRestaurants function for another round of 10k inserts
       makeRestaurant(count);
     })
     .catch((err) => {

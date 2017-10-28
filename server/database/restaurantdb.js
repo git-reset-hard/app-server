@@ -16,9 +16,34 @@ const client = new elasticsearch.Client({
 //   }
 // });
 
+// client.deleteByQuery({
+//   index: 'restaurant'
+// }, function (error) {
+//   if (error) {
+//     console.trace('elasticsearch index delete error');
+//   } else {
+//     console.log('elasticsearch index deleted');
+//   }
+// });
 
 // client.create({
-//   index: 'restaurant',
+//   index: 'newmap',
+//   type: 'type1',
+//   id: 1,
+//   body: {
+//     testLocation: { lat: 30, lon: -75 },
+//   }
+// }, function (error) {
+//   if (error) {
+//     console.trace('error with post');
+//   } else {
+//     console.log('post was good');
+//   }
+// });
+
+
+// client.create({
+//   index: 'newmap',
 //   type: 'item',
 //   id: '1',
 //   body: {

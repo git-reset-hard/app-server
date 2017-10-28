@@ -23,6 +23,7 @@ db.authenticate()
   });
 
 
+
 //User Schema
 const User = db.define('user', {
   id: {
@@ -31,6 +32,9 @@ const User = db.define('user', {
   },
   index: Sequelize.INTEGER,
   name: Sequelize.STRING,
+  hometown: Sequelize.INTEGER,
+  lat: Sequelize.INTEGER,
+  long: Sequelize.INTEGER,
   getsPersonalized: Sequelize.BOOLEAN
 }, {
   indexes: [
@@ -47,9 +51,12 @@ const Query = db.define('query', {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  userId: Sequelize.STRING,
+  numericalIndex: Sequelize.INTEGER,
   searchTerm: Sequelize.STRING,
   location: Sequelize.INTEGER,
-  servedList: Sequelize.STRING
+  servedList: Sequelize.STRING,
+  date: Sequelize.DATE
 }, {
   indexes: [
     {
@@ -65,6 +72,7 @@ const List = db.define('list', {
     type: Sequelize.STRING,
     primaryKey: true
   },
+  numericalIndex: Sequelize.INTEGER,
   isPersonalized: Sequelize.BOOLEAN,
   restaurantID_1: Sequelize.STRING,
   restaurantID_2: Sequelize.STRING,
@@ -88,12 +96,12 @@ const List = db.define('list', {
 
 
 //Relationship between User & Query
-User.hasMany(Query);
-Query.belongsTo(User);
+// User.hasMany(Query);
+// Query.belongsTo(User);
 
 //Relationship between Query & List
-List.hasOne(Query);
-Query.belongsTo(List);
+// List.hasOne(Query);
+// Query.belongsTo(List);
 
 
 User.sync()
