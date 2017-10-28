@@ -11,7 +11,17 @@ const handleQuery = require('./controller/queryHandler.js');
 const fs = require('fs');
 const shortid = require('shortid');
 
-const LOG_FILE = './logs/log.log';
+const winston = require('winston');
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: './logs/combined.log' })
+  ]
+});
+
+
 // import entire SDK
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath('./config/config.json');
@@ -30,7 +40,9 @@ app.get('/searchRestaurants', (req, res) => {
   if (req.query.searchTerm || req.query.location || req.query.userId) {
     let logid = shortid.generate();
     let startTime = new Date();
-    let log = {
+
+    logger.log({
+      level: 'info',
       type: 'log',
       time: startTime,
       process: 'initiate',
@@ -38,8 +50,9 @@ app.get('/searchRestaurants', (req, res) => {
       action: '',
       success: true,
       logid: logid,
-    };
-    fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+    });
+
+
     req.query.logid = logid;
     req.query.startTime = startTime;
     handleQuery(req, res);
@@ -49,24 +62,6 @@ app.get('/searchRestaurants', (req, res) => {
     res.send('search parameters cannot be undefined');
   }
 });
-
-
-
-
-
-
-
-// restaurantList.search({
-//   index: 'restaurant',
-//   q: 'tags:mexican'
-// })
-//   .then((response) => {
-//     console.log('query successful ', response);
-//   })
-//   .catch((err) => {
-//     console.log('query error ', error);
-//   }); 
-
 
 
 server.listen(port, () => {

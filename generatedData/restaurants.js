@@ -57,7 +57,7 @@ const makeRestaurant = function(count = 1) {
     let tags = '';
     
     for (let j = 0; j < numberTags; j++) {
-      let index = Math.floor(randomIndex * restaurantCats.length);
+      let index = Math.floor(Math.random() * restaurantCats.length);
       let tag = restaurantCats[index];
       tags += tag + ' ';
     }
