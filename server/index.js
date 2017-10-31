@@ -24,7 +24,7 @@ const logger = winston.createLogger({
 
 // import entire SDK
 var AWS = require('aws-sdk');
-AWS.config.loadFromPath('./config/config.json');
+AWS.config.loadFromPath('./server/config/config.json');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -61,6 +61,10 @@ app.get('/searchRestaurants', (req, res) => {
     res.status(400);
     res.send('search parameters cannot be undefined');
   }
+});
+
+app.get('/hello', (req, res) => {
+  res.status(200).send('hello');
 });
 
 

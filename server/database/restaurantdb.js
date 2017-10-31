@@ -17,7 +17,7 @@ const client = new elasticsearch.Client({
 // });
 
 // client.deleteByQuery({
-//   index: 'restaurant'
+//   index: 'query'
 // }, function (error) {
 //   if (error) {
 //     console.trace('elasticsearch index delete error');

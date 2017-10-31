@@ -32,8 +32,6 @@ const generateUser = function(start, end) {
       //pull real zipcode from zipcode file
       
       let userObj = {
-        id: shortid.generate(),
-        index: i,
         name: name,
         getsPersonalized: getsPersonalized,
         hometown: zipcode,
@@ -49,7 +47,6 @@ const generateUser = function(start, end) {
       start = end;
       end += 3000;
       if (start === 37656) {
-        count = 0;
         start = 0;
         end = 3000;
       }

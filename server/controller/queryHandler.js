@@ -4,6 +4,9 @@ const restaurantList = require('../database/restaurantdb.js');
 const appServerDB = require('../database/mysql.js');
 const shortid = require('shortid');
 const fs = require('fs');
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('./server/config/config.json');
+var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 const winston = require('winston');
 const logger = winston.createLogger({
@@ -180,6 +183,7 @@ const handleQuery = function (req, res) {
     .then((list) => {
       //marks list as customized or not
       list.isPersonalized = list.customized;
+      list.type = 'list';
       //log that both restaurant list and generic lists have been returned, logs the lists into elasticsearch
       logger.log({
         level: 'info',
@@ -194,7 +198,7 @@ const handleQuery = function (req, res) {
       });
 
       
-      //send copy of list and original query to database
+      //send copy of list to database
       appServerDB.List.create(list);
 
       //log query into elasticSearch restaurants database to access detailed restaurant info
@@ -211,15 +215,48 @@ const handleQuery = function (req, res) {
 
       //send query into MySQL database for storage
       let queryObj = {
+        type: 'query',
         id: shortid.generate(),
+        userId: req.query.userId,
         searchTerm: req.query.searchTerm,
         location: req.query.location,
         servedList: list.id,
-        logid: req.query.logid
+        date: req.query.date,
+        isPersonalized: list.customized
       };
       appServerDB.Query.create(queryObj);
 
-      //---------------TODO: send copy and query to analytics and customer profiling via SQS--------------------------------
+      console.log('send to analytics: ', queryObj, list);
+
+      //---------------TODO: send list and query to analytics and customer profiling via SQS--------------------------------
+      let querySQS = {
+        DelaySeconds: 10,
+        MessageBody: JSON.stringify(queryObj),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
+      };
+
+      sqs.sendMessage(querySQS, function(err, data) {
+        if (err) {
+          console.log('Error"', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
+
+      list.queryID = queryObj.id;
+      let listSQS = {
+        DelaySeconds: 10,
+        MessageBody: JSON.stringify(list),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
+      };
+
+      sqs.sendMessage(listSQS, function(err, data) {
+        if (err) {
+          console.log('Error"', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
 
       let restaurantArr = [];
 
@@ -239,7 +276,6 @@ const handleQuery = function (req, res) {
         restaurantArr.push(queryMethod);
         restaurantArr.push(queryBody);
       }
-
       //make bulk query to restaurantDB elasticSearch with the list and generate full profile of restaurants
       restaurantList.msearch({
         body: restaurantArr

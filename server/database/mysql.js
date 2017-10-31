@@ -27,10 +27,10 @@ db.authenticate()
 //User Schema
 const User = db.define('user', {
   id: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
     primaryKey: true
   },
-  index: Sequelize.INTEGER,
   name: Sequelize.STRING,
   hometown: Sequelize.INTEGER,
   lat: Sequelize.INTEGER,

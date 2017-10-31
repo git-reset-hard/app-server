@@ -4,7 +4,7 @@
   "description": "Yelp-Alytics Service which receives yelp queries from user and sends back lists of restaurants. ",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --inspect server/index.js",
+    "start": "node server/index.js",
     "test": "mocha --bail --reporter nyan specs/server.js;"
   },
   "repository": {
