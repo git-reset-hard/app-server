@@ -1,15 +1,16 @@
+const config = require('./config/env.json')[process.env.NODE_ENV || 'development'];
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const bodyParser = require('body-parser');
 const request = require('request');
 const rp = require('request-promise-native');
-const port = process.env.PORT || 2424;
 const restaurantList = require('./database/restaurantdb.js');
 const appServerDB = require('./database/mysql.js');
 const handleQuery = require('./controller/queryHandler.js');
 const fs = require('fs');
 const shortid = require('shortid');
+const uploadLogs = require('./logs/logUploader.js');
 
 const winston = require('winston');
 const logger = winston.createLogger({
@@ -34,12 +35,20 @@ app.get('/', (req, res) => {
   res.send('Serving up webpage');
 });
 
+let logCounter = 0;
+
 //GET handler will use req.query.OBJ to get query string, location and userId of query
 app.get('/searchRestaurants', (req, res) => {
+  if (logCounter >= 100) {
+    uploadLogs();
+    logCounter = 0;
+  }
+
   //check to make sure query parameters are valid
   if (req.query.searchTerm || req.query.location || req.query.userId) {
     let logid = shortid.generate();
     let startTime = new Date();
+    logCounter++;
 
     logger.log({
       level: 'info',
@@ -68,6 +77,6 @@ app.get('/hello', (req, res) => {
 });
 
 
-server.listen(port, () => {
-  console.log(`(>^.^)> Server now listening on ${port}!`);
+server.listen(config.port, () => {
+  console.log(`(>^.^)> Server now listening on ${config.port}!`);
 });

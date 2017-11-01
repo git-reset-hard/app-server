@@ -1,18 +1,7 @@
+const config = require('../config/env.json')[process.env.NODE_ENV || 'development'];
 const Sequelize = require('sequelize');
-let db;
+const db = new Sequelize(config.mysql);
 
-if (process.env.DATABASE_URL) {
-  db = new Sequelize(process.env.DATABASE_URL);
-} else {
-  db = new Sequelize({
-    database: 'app_server',
-    username: 'student',
-    password: 'student',
-    dialect: 'mysql',
-    logging: false,
-    operatorsAliases: false
-  });
-}
 
 db.authenticate()
   .then(() => {

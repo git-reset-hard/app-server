@@ -226,8 +226,6 @@ const handleQuery = function (req, res) {
       };
       appServerDB.Query.create(queryObj);
 
-      console.log('send to analytics: ', queryObj, list);
-
       //---------------TODO: send list and query to analytics and customer profiling via SQS--------------------------------
       let querySQS = {
         DelaySeconds: 10,
