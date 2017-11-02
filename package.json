@@ -35,6 +35,7 @@
     "request-promise-native": "^1.0.5",
     "sequelize": "^4.17.0",
     "shortid": "^2.2.8",
-    "winston": "^3.0.0-rc1"
+    "winston": "^3.0.0-rc1",
+    "winston-elasticsearch": "^0.5.3"
   }
 }

@@ -17,7 +17,7 @@ const client = new elasticsearch.Client({
 // });
 
 // client.deleteByQuery({
-//   index: 'query'
+//   index: 'querytracker'
 // }, function (error) {
 //   if (error) {
 //     console.trace('elasticsearch index delete error');

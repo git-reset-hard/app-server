@@ -1,3 +1,4 @@
+const config = require('../config/env.json')[process.env.NODE_ENV || 'development'];
 const request = require('request');
 const rp = require('request-promise-native');
 const restaurantList = require('../database/restaurantdb.js');
@@ -9,12 +10,33 @@ AWS.config.loadFromPath('./server/config/config.json');
 var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 const winston = require('winston');
+const Elasticsearch = require('winston-elasticsearch');
+const esTransportOpts = {
+  level: 'info',
+  client: restaurantList,
+  ensureMappingTemplate: false,
+  index: 'querytracker',
+  transformer: (obj) => {
+    let newObj = {};
+    for (let i in obj) {
+      if (i === 'meta') {
+        for (let j in obj.meta) {
+          newObj[j] = obj.meta[j];
+        }
+      } else {
+        newObj[i] = obj[i];
+      }
+    }
+    return newObj;
+  }
+};
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: './logs/combined.log' })
+    new Elasticsearch(esTransportOpts),
+    new winston.transports.File({ filename: '../server/logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: '../server/logs/combined.log' })
   ]
 });
 
@@ -54,19 +76,16 @@ const handleQuery = function (req, res) {
           type: 'search',
           time: req.query.date,
           userId: req.query.userId,
-          location: req.query.location,
+          zipcode: req.query.location,
           searchTerm: req.query.searchTerm,
-          location: {
-            lat: user.lat,
-            lon: user.long
-          },
+          location: user.lat + ', ' + user.long,
           logid: req.query.logid
         });
 
         let options = {
           'method': 'POST',
           //----------THIS LINE WILL NEED TO BE CHANGED TO ACCESS SERVICE OF RECOMMENDATIONS ENGINE-------------
-          'uri': 'http://127.0.0.1:2425/recommendationsEngine',
+          'uri': 'http://' + config.recommendationsHost + '/recommendationsEngine',
           'body': {
             userId: req.query.userId,
             searchTerm: req.query.searchTerm,
@@ -106,12 +125,9 @@ const handleQuery = function (req, res) {
           type: 'search',
           time: req.query.date,
           userId: req.query.userId,
-          location: req.query.location,
+          zipcode: req.query.location,
           searchTerm: req.query.searchTerm,
-          location: {
-            lat: user.lat,
-            lon: user.long
-          },
+          location: user.lat + ', ' + user.long,
           logid: req.query.logid
         });
         //log prior to sending generic query list retrieval

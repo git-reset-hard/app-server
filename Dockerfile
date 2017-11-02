@@ -5,4 +5,4 @@ COPY package.json .
 RUN npm install
 COPY . .
 EXPOSE 2424
-CMD [ "npm", "start" ]
+EXPOSE 2425

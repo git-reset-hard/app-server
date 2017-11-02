@@ -10,15 +10,36 @@ const appServerDB = require('./database/mysql.js');
 const handleQuery = require('./controller/queryHandler.js');
 const fs = require('fs');
 const shortid = require('shortid');
-const uploadLogs = require('./logs/logUploader.js');
+//const uploadLogs = require('./logs/logUploader.js');
 
 const winston = require('winston');
+const Elasticsearch = require('winston-elasticsearch');
+const esTransportOpts = {
+  level: 'info',
+  client: restaurantList,
+  ensureMappingTemplate: false,
+  index: 'querytracker',
+  transformer: (obj) => {
+    let newObj = {};
+    for (let i in obj) {
+      if (i === 'meta') {
+        for (let j in obj.meta) {
+          newObj[j] = obj.meta[j];
+        }
+      } else {
+        newObj[i] = obj[i];
+      }
+    }
+    return newObj;
+  }
+};
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: './logs/combined.log' })
+    new Elasticsearch(esTransportOpts),
+    new winston.transports.File({ filename: '../server/logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: '../server/logs/combined.log' })
   ]
 });
 
@@ -35,20 +56,14 @@ app.get('/', (req, res) => {
   res.send('Serving up webpage');
 });
 
-let logCounter = 0;
 
 //GET handler will use req.query.OBJ to get query string, location and userId of query
 app.get('/searchRestaurants', (req, res) => {
-  if (logCounter >= 100) {
-    uploadLogs();
-    logCounter = 0;
-  }
 
   //check to make sure query parameters are valid
   if (req.query.searchTerm || req.query.location || req.query.userId) {
     let logid = shortid.generate();
     let startTime = new Date();
-    logCounter++;
 
     logger.log({
       level: 'info',
@@ -58,7 +73,7 @@ app.get('/searchRestaurants', (req, res) => {
       elapsed: new Date() - startTime,
       action: '',
       success: true,
-      logid: logid,
+      logid: logid
     });
 
 

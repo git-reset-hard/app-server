@@ -1,16 +1,37 @@
 const fs = require('fs');
 const db = require('../server/database/mysql.js');
 const shortid = require('shortid');
-const elasticSearch = require('../server/database/restaurantdb.js');
+const restaurantList = require('../server/database/restaurantdb.js');
 const rp = require('request-promise-native');
 const faker = require('faker');
 faker.seed(123);
 
 const winston = require('winston');
+const Elasticsearch = require('winston-elasticsearch');
+const esTransportOpts = {
+  level: 'info',
+  client: restaurantList,
+  ensureMappingTemplate: false,
+  index: 'querytracker',
+  transformer: (obj) => {
+    let newObj = {};
+    for (let i in obj) {
+      if (i === 'meta') {
+        for (let j in obj.meta) {
+          newObj[j] = obj.meta[j];
+        }
+      } else {
+        newObj[i] = obj[i];
+      }
+    }
+    return newObj;
+  }
+};
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
+    new Elasticsearch(esTransportOpts),
     new winston.transports.File({ filename: '../server/logs/error.log', level: 'error' }),
     new winston.transports.File({ filename: '../server/logs/combined.log' })
   ]
@@ -99,7 +120,7 @@ const generateQuery = function (count) {
       });
       let options = {
         'method': 'GET',
-        'uri': 'http://127.0.0.1:2424/searchRestaurants',
+        'uri': 'http://localhost:2424/searchRestaurants',
         'qs': {
           searchTerm: query.searchTerm,
           location: query.location,
