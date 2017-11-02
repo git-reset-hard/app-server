@@ -120,7 +120,7 @@ const generateQuery = function (count) {
       });
       let options = {
         'method': 'GET',
-        'uri': 'http://localhost:2424/searchRestaurants',
+        'uri': 'http://54.153.22.50/searchRestaurants',
         'qs': {
           searchTerm: query.searchTerm,
           location: query.location,
