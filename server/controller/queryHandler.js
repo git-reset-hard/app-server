@@ -1,18 +1,53 @@
+const config = require('../config/env.json')[process.env.NODE_ENV || 'development'];
 const request = require('request');
 const rp = require('request-promise-native');
 const restaurantList = require('../database/restaurantdb.js');
 const appServerDB = require('../database/mysql.js');
 const shortid = require('shortid');
 const fs = require('fs');
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('./server/config/config.json');
+var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
-const LOG_FILE = './logs/log.log';
+const winston = require('winston');
+const Elasticsearch = require('winston-elasticsearch');
+const esTransportOpts = {
+  level: 'info',
+  client: restaurantList,
+  ensureMappingTemplate: false,
+  index: 'querytracker',
+  transformer: (obj) => {
+    let newObj = {};
+    for (let i in obj) {
+      if (i === 'meta') {
+        for (let j in obj.meta) {
+          newObj[j] = obj.meta[j];
+        }
+      } else {
+        newObj[i] = obj[i];
+      }
+    }
+    return newObj;
+  }
+};
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new Elasticsearch(esTransportOpts),
+    new winston.transports.File({ filename: '../server/logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: '../server/logs/combined.log' })
+  ]
+});
 
 const handleQuery = function (req, res) {
   //check userId against database to see if generic list or personalized list will be served
   appServerDB.User.findById(req.query.userId)
     .then((user) => {
       if (user === null) {
-        let log = {
+        //log failed user lookup
+        logger.log({
+          level: 'error',
           type: 'log',
           time: new Date(),
           elapsed: new Date() - req.query.startTime,
@@ -20,40 +55,37 @@ const handleQuery = function (req, res) {
           action: 'failed user lookup',
           success: false,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+        });
+
         throw new Error('no user found in database');
       } else if (user.getsPersonalized) {
-
-        let log = {
+        //log return of user information from MySQL DB query
+        logger.log({
+          level: 'info',
           type: 'log',
           time: new Date(),
           elapsed: new Date() - req.query.startTime,
           process: 'userReturn',
-          action: '',
+          action: 'user successfuly retrieved - gets personalized list',
           success: true,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
-
-        let search = {
+        });
+        //log search terms with user information
+        logger.log({
+          level: 'info',
           type: 'search',
           time: req.query.date,
           userId: req.query.userId,
-          location: req.query.location,
+          zipcode: req.query.location,
           searchTerm: req.query.searchTerm,
-          location: {
-            lat: user.lat,
-            lon: user.long
-          },
+          location: user.lat + ', ' + user.long,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(search) + '\n');
+        });
 
         let options = {
           'method': 'POST',
           //----------THIS LINE WILL NEED TO BE CHANGED TO ACCESS SERVICE OF RECOMMENDATIONS ENGINE-------------
-          'uri': 'http://127.0.0.1:2425/recommendationsEngine',
+          'uri': 'http://' + config.recommendationsHost + '/recommendationsEngine',
           'body': {
             userId: req.query.userId,
             searchTerm: req.query.searchTerm,
@@ -61,8 +93,9 @@ const handleQuery = function (req, res) {
           },
           'json': true,
         };
-
-        let log2 = {
+        //log prior to sending to recommendations
+        logger.log({
+          level: 'info',
           type: 'log',
           time: new Date(),
           elapsed: new Date() - req.query.startTime,
@@ -70,40 +103,36 @@ const handleQuery = function (req, res) {
           action: 'send to recommendations',
           success: true,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(log2) + '\n');
+        });
+
         //POST made to recommendations engine for a personalized list
         return rp(options);          
       } else {
-
-        let log = {
+        //log successful user retrieval
+        logger.log({
+          level: 'info',
           type: 'log',
           time: new Date(),
           elapsed: new Date() - req.query.startTime,
           process: 'userReturn',
-          action: '',
+          action: 'user successfuly retrieved - gets generic list',
           success: true,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
-
-        let search = {
+        });
+        //log search term tied with user details
+        logger.log({
+          level: 'info',
           type: 'search',
           time: req.query.date,
           userId: req.query.userId,
-          location: req.query.location,
+          zipcode: req.query.location,
           searchTerm: req.query.searchTerm,
-          location: {
-            lat: user.lat,
-            lon: user.long
-          },
+          location: user.lat + ', ' + user.long,
           logid: req.query.logid
-        };
-
-        fs.appendFile(LOG_FILE, JSON.stringify(search) + '\n');
-        //query elasticsearch restaurantDB for generic list which matches query
-
-        let log2 = {
+        });
+        //log prior to sending generic query list retrieval
+        logger.log({
+          level: 'info',
           type: 'log',
           time: new Date(),
           elapsed: new Date() - req.query.startTime,
@@ -111,41 +140,53 @@ const handleQuery = function (req, res) {
           action: 'query for generic list',
           success: true,
           logid: req.query.logid
-        };
-        fs.appendFile(LOG_FILE, JSON.stringify(log2) + '\n');
-
+        });
+        //query elasticsearch restaurantDB for generic list which matches query
+        //query below prioritizes searchTerm over zipcode (this can be easily adjusted by changing boost values)
         return restaurantList.search({
           index: 'restaurant',
           size: 10,
           body: {
             query: {
               bool: {
-                should: [
-                  { match: { tags: req.query.searchTerm }},
-                  { match: { zipcode: req.query.location }}
-                ]
+                should: [{
+                  match: {
+                    tags: {
+                      query: req.query.searchTerm,
+                      boost: 2
+                    }
+                  }
+                },
+                {
+                  match: {
+                    zipcode: {
+                      query: req.query.location
+                    }
+                  }
+                }]
               }
             }
           }
         })
           .then((response) => {
-
-            let log = {
+            //log list return from elasticSearch generic query
+            logger.log({
+              level: 'info',
               type: 'log',
               time: new Date(),
               elapsed: new Date() - req.query.startTime,
               process: 'getList',
-              action: 'compiling list',
+              action: 'process generic list',
               success: true,
               logid: req.query.logid
-            };
-            fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+            });
 
             let restaurants = response.hits.hits;
             let listObj = {
               id: shortid.generate(),
               customized: false,
             };
+
             for (let i = 1; i <= restaurants.length; i++) {
               let restaurantIDStr = 'restaurantID_' + i;
               listObj[restaurantIDStr] = restaurants[i - 1]._id;
@@ -156,23 +197,29 @@ const handleQuery = function (req, res) {
 
     })
     .then((list) => {
-      let log = {
+      //marks list as customized or not
+      list.isPersonalized = list.customized;
+      list.type = 'list';
+      //log that both restaurant list and generic lists have been returned, logs the lists into elasticsearch
+      logger.log({
+        level: 'info',
         type: 'log',
         time: new Date(),
         elapsed: new Date() - req.query.startTime,
         process: 'getList',
         action: 'lists returned',
         success: true,
-        logid: req.query.logid
-      };
-      fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+        logid: req.query.logid,
+        list: list
+      });
+
       
-      //send copy of list and original query to database
-      list.isPersonalized = list.customized;
+      //send copy of list to database
       appServerDB.List.create(list);
 
-
-      let log2 = {
+      //log query into elasticSearch restaurants database to access detailed restaurant info
+      logger.log({
+        level: 'info',
         type: 'log',
         time: new Date(),
         elapsed: new Date() - req.query.startTime,
@@ -180,19 +227,50 @@ const handleQuery = function (req, res) {
         action: 'sending list to get restaurant details',
         success: true,
         logid: req.query.logid
-      };
-      fs.appendFile(LOG_FILE, JSON.stringify(log2) + '\n');
+      });
 
+      //send query into MySQL database for storage
       let queryObj = {
+        type: 'query',
         id: shortid.generate(),
+        userId: req.query.userId,
         searchTerm: req.query.searchTerm,
         location: req.query.location,
         servedList: list.id,
-        logid: req.query.logid
+        date: req.query.date,
+        isPersonalized: list.customized
       };
       appServerDB.Query.create(queryObj);
 
-      //---------------TODO: send copy and query to analytics and customer profiling--------------------------------
+      //---------------TODO: send list and query to analytics and customer profiling via SQS--------------------------------
+      let querySQS = {
+        DelaySeconds: 10,
+        MessageBody: JSON.stringify(queryObj),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
+      };
+
+      sqs.sendMessage(querySQS, function(err, data) {
+        if (err) {
+          console.log('Error"', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
+
+      list.queryID = queryObj.id;
+      let listSQS = {
+        DelaySeconds: 10,
+        MessageBody: JSON.stringify(list),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
+      };
+
+      sqs.sendMessage(listSQS, function(err, data) {
+        if (err) {
+          console.log('Error"', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
 
       let restaurantArr = [];
 
@@ -212,8 +290,7 @@ const handleQuery = function (req, res) {
         restaurantArr.push(queryMethod);
         restaurantArr.push(queryBody);
       }
-      
-      //query restaurantDB with the list and generate real list of restaurants
+      //make bulk query to restaurantDB elasticSearch with the list and generate full profile of restaurants
       restaurantList.msearch({
         body: restaurantArr
       })
@@ -223,8 +300,8 @@ const handleQuery = function (req, res) {
             restaurantList.push(restaurants.responses[i].hits.hits[0]._source);
           }
           //send full list of restaurant details back to client
-
-          let log = {
+          logger.log({
+            level: 'info',
             type: 'log',
             time: new Date(),
             elapsed: new Date() - req.query.startTime,
@@ -232,14 +309,15 @@ const handleQuery = function (req, res) {
             action: 'send list back to user',
             success: true,
             logid: req.query.logid
-          };
-          fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+          });
 
           res.status(200);
           res.send(restaurantList);
         })
         .catch((err) => {
-          let log = {
+          //log error with querying for restaurants
+          logger.log({
+            level: 'error',
             type: 'log',
             time: new Date(),
             elapsed: new Date() - req.query.startTime,
@@ -247,13 +325,23 @@ const handleQuery = function (req, res) {
             action: 'problem querying restaurants from ElasticSearch',
             success: false,
             logid: req.query.logid
-          };
-          fs.appendFile(LOG_FILE, JSON.stringify(log) + '\n');
+          });
+
           console.log('problem querying restaurants ', err);
         });
     })
     .catch((err) => {
       console.log('error with query ', err);
+      logger.log({
+        level: 'error',
+        type: 'log',
+        time: new Date(),
+        elapsed: new Date() - req.query.startTime,
+        process: 'full query',
+        action: 'problem with obtaining list and returning to user',
+        success: false,
+        logid: req.query.logid
+      });
       res.status(400);
       res.send('no user found');
     });

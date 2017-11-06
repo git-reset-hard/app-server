@@ -1,18 +1,7 @@
+const config = require('../config/env.json')[process.env.NODE_ENV || 'development'];
 const Sequelize = require('sequelize');
-let db;
+const db = new Sequelize(config.mysql);
 
-if (process.env.DATABASE_URL) {
-  db = new Sequelize(process.env.DATABASE_URL);
-} else {
-  db = new Sequelize({
-    database: 'app_server',
-    username: 'student',
-    password: 'student',
-    dialect: 'mysql',
-    logging: false,
-    operatorsAliases: false
-  });
-}
 
 db.authenticate()
   .then(() => {
@@ -27,10 +16,10 @@ db.authenticate()
 //User Schema
 const User = db.define('user', {
   id: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
     primaryKey: true
   },
-  index: Sequelize.INTEGER,
   name: Sequelize.STRING,
   hometown: Sequelize.INTEGER,
   lat: Sequelize.INTEGER,

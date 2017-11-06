@@ -9,12 +9,6 @@ faker.seed(123);
 let zipcodes = fs.readFileSync('./zipcodes.js').toString();
 zipcodes = JSON.parse(zipcodes);
 
-//ZIPCODES Object is available from within this function. Do whatever you need to do from here (eg database insert or lookup or whatever);
-
-// console.log('number of zipcodes available: ', zipcodes.length);
-// let randomzipcode = Math.floor(Math.random() * zipcodes.length);
-// console.log('random zipcode obj: ', zipcodes[randomzipcode]);
-
 let populated = [];
 for (let i in zipcodes) {
   if (zipcodes[i].EstimatedPopulation > 1000 && zipcodes[i].Zipcode > 10000) {
@@ -23,13 +17,14 @@ for (let i in zipcodes) {
 }
 
 
+var count = 0;
 const generateUser = function(start, end) {
 
   let users = [];
-
-  //37656
+  //37656 populated zipcodes
   for (let i = start; i < end; i++) {
     for (let j = 0; j < parseInt(populated[i].EstimatedPopulation); j += 1000) {
+      count++;
       let name = faker.fake('{{name.firstName}} {{name.lastName}}');
       let getsPersonalized = (Math.random() >= 0.5);
       let zipcode = populated[i].Zipcode;
@@ -37,8 +32,6 @@ const generateUser = function(start, end) {
       //pull real zipcode from zipcode file
       
       let userObj = {
-        id: shortid.generate(),
-        index: i,
         name: name,
         getsPersonalized: getsPersonalized,
         hometown: zipcode,
@@ -47,13 +40,17 @@ const generateUser = function(start, end) {
       };
       users.push(userObj);
     }
-    //console.log(i);
   }
 
   db.User.bulkCreate(users)
     .then(()=> {
       start = end;
       end += 3000;
+      if (start === 37656) {
+        start = 0;
+        end = 3000;
+      }
+      console.log('next round...', start, count);
       if (end >= 37656) {
         generateUser(start, 37656);
       } else {

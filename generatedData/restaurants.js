@@ -11,12 +11,12 @@ faker.seed(123);
 let categories = fs.readFileSync('./categories.json').toString();
 categories = JSON.parse(categories);
 
-let restaurantCats = [];
+let restaurantCategories = [];
 for (let i in categories) {
   for (let j in categories[i].parents) {
     if (categories[i].parents[j] === 'restaurants') {
       for (let z = 0; z < Math.floor(Math.random() * 4); z++) {
-        restaurantCats.push(categories[i].alias);
+        restaurantCategories.push(categories[i].alias);
       }
     }
   }
@@ -57,8 +57,8 @@ const makeRestaurant = function(count = 1) {
     let tags = '';
     
     for (let j = 0; j < numberTags; j++) {
-      let index = Math.floor(randomIndex * restaurantCats.length);
-      let tag = restaurantCats[index];
+      let index = Math.floor(Math.random() * restaurantCategories.length);
+      let tag = restaurantCategories[index];
       tags += tag + ' ';
     }
     let restaurantObj = {

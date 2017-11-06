@@ -21,3 +21,7 @@ Tests to write
 
 http://ows.mundialis.de/services/service?
 TOPO-OSM-WMS
+
+
+-01 Nov 17: working on deployment 
+- deploy mock recommendations service
