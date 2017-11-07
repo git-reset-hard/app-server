@@ -17,7 +17,6 @@ db.authenticate()
 const User = db.define('user', {
   id: {
     type: Sequelize.INTEGER,
-    autoIncrement: true,
     primaryKey: true
   },
   name: Sequelize.STRING,

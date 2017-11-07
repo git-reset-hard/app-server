@@ -22,22 +22,16 @@ curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.am
     }
 }'
 
-curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.amazonaws.com/querylogs?pretty' -H 'Content-Type: application/json' -d'
+curl -XPUT 'https://search-app-server-ikcfhma3cq4ms4rs6xxnmraoe4.us-west-1.es.amazonaws.com/restaurantprod?pretty' -H 'Content-Type: application/json' -d'
  {
      "settings" : {
          "number_of_shards" : 1
      },
      "mappings" : {
-         "search" : {
+         "restaurant" : {
              "properties" : {
                  "location" : { "type" : "geo_point" },
                  "time" : {"type" : "date"}
-             }
-         },
-         "logs" : {
-             "properties" : {
-                 "time" : {"type" : "date"},
-                 "success" : {"type" : "boolean"}
              }
          }
      }

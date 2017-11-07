@@ -6,7 +6,8 @@
   "scripts": {
     "dev-start": "nodemon server/index.js",
     "dev-mockEngine": "nodemon server/mockRecommendations.js",
-    "test": "mocha --bail --reporter nyan specs/server.js;",
+    "test-server": "mocha --bail --reporter nyan specs/server.js;",
+    "test-database": "mocha --bail --reporter nyan specs/database.js;",
     "start": "NODE_ENV=production node server/index.js"
   },
   "repository": {
@@ -35,6 +36,7 @@
     "request-promise-native": "^1.0.5",
     "sequelize": "^4.17.0",
     "shortid": "^2.2.8",
+    "sqs-consumer": "^3.8.0",
     "winston": "^3.0.0-rc1",
     "winston-elasticsearch": "^0.5.3"
   }

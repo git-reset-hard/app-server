@@ -5,6 +5,9 @@ const db = require('../server/database/mysql.js');
 const shortid = require('shortid');
 const fs = require('fs');
 faker.seed(123);
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('../server/config/config.json');
+var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 let zipcodes = fs.readFileSync('./zipcodes.js').toString();
 zipcodes = JSON.parse(zipcodes);
@@ -38,28 +41,42 @@ const generateUser = function(start, end) {
         lat: populated[i].Lat,
         long: populated[i].Long
       };
-      users.push(userObj);
+      // users.push(userObj);
+      let userSQS = {
+        DelaySeconds: 10,
+        MessageBody: JSON.stringify(userObj),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
+        //https://sqs.us-west-1.amazonaws.com/321889521012/usersToAnalytics
+      };
+
+      sqs.sendMessage(userSQS, function(err, data) {
+        if (err) {
+          console.log('Error"', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
     }
   }
 
-  db.User.bulkCreate(users)
-    .then(()=> {
-      start = end;
-      end += 3000;
-      if (start === 37656) {
-        start = 0;
-        end = 3000;
-      }
-      console.log('next round...', start, count);
-      if (end >= 37656) {
-        generateUser(start, 37656);
-      } else {
-        generateUser(start, end);
-      }
-    })
-    .catch((err) => {
-      console.log('something wrong ', err);
-    });
+  // db.User.bulkCreate(users)
+  //   .then(()=> {
+  //     start = end;
+  //     end += 3000;
+  //     if (start === 37656) {
+  //       start = 0;
+  //       end = 3000;
+  //     }
+  //     console.log('next round...', start, count);
+  //     if (end >= 37656) {
+  //       generateUser(start, 37656);
+  //     } else {
+  //       generateUser(start, end);
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     console.log('something wrong ', err);
+  //   });
 };
 generateUser(0, 3000);
 

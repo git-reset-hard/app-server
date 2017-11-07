@@ -8,21 +8,7 @@ var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 var params = {
   DelaySeconds: 10,
-  MessageAttributes: {
-    'Title': {
-      DataType: 'String',
-      StringValue: 'The Whistler'
-    },
-    'Author': {
-      DataType: 'String',
-      StringValue: 'John Grisham'
-    },
-    'WeeksOn': {
-      DataType: 'Number',
-      StringValue: '6'
-    }
-  },
-  MessageBody: 'Information about current NY Times fiction bestseller for week of 12/11/2016.',
+  MessageBody: JSON.stringify(restaurantObj),
   QueueUrl: 'https://sqs.us-west-1.amazonaws.com/478994730514/app-serverToAnalytics'
 };
 
