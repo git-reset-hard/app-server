@@ -3,48 +3,13 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const bodyParser = require('body-parser');
-const request = require('request');
-const rp = require('request-promise-native');
-const restaurantList = require('./database/restaurantdb.js');
-const appServerDB = require('./database/mysql.js');
 const handleQuery = require('./controller/queryHandler.js');
-const fs = require('fs');
+const handleRestaurant = require('./controller/restaurantHandler.js');
+const handleUser = require('./controller/userHandler.js');
 const shortid = require('shortid');
-//const uploadLogs = require('./logs/logUploader.js');
-
-const winston = require('winston');
-const Elasticsearch = require('winston-elasticsearch');
-const esTransportOpts = {
-  level: 'info',
-  client: restaurantList,
-  ensureMappingTemplate: false,
-  index: 'querytracker',
-  transformer: (obj) => {
-    let newObj = {};
-    for (let i in obj) {
-      if (i === 'meta') {
-        for (let j in obj.meta) {
-          newObj[j] = obj.meta[j];
-        }
-      } else {
-        newObj[i] = obj[i];
-      }
-    }
-    return newObj;
-  }
-};
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new Elasticsearch(esTransportOpts),
-    new winston.transports.File({ filename: '../server/logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: '../server/logs/combined.log' })
-  ]
-});
-
-
-// import entire SDK
+const logger = require('./config/winston-config.js');
+const restaurantList = require('./database/restaurantdb.js');
+const Consumer = require('sqs-consumer');
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath('./server/config/config.json');
 
@@ -91,6 +56,61 @@ app.get('/hello', (req, res) => {
   res.status(200).send('hello');
 });
 
+const restaurantSQS = Consumer.create({
+  queueUrl: 'https://sqs.us-west-1.amazonaws.com/213354805027/appserver',
+  batchSize: 10,
+  handleMessage: (message, done) => {
+    let body = JSON.parse(message.Body);
+    let restaurantObj = {
+      id: body.id,
+      name: body.name,
+      city: body.city,
+      state: body.state,
+      zipcode: body.zipcode,
+      phone: body.phone,
+      priceRange: body.price,
+      tags: body.categories,
+      stars: body.rating,
+      location: body.latitude + ',' + body.longitude
+    };
+
+    handleRestaurant(restaurantObj, done);
+  },
+  sqs: new AWS.SQS()
+});
+ 
+restaurantSQS.on('error', (err) => {
+  console.log(err.message);
+});
+ 
+restaurantSQS.start();
+console.log('listening for SQS messages from restaurant profiler...');
+
+const usersSQS = Consumer.create({
+  queueUrl: 'https://sqs.us-west-1.amazonaws.com/321889521012/usersToAnalytics',
+  batchSize: 10,
+  handleMessage: (message, done) => {
+    let body = JSON.parse(message.Body);
+
+    let userObj = {
+      id: body.numId,
+      name: body.name,
+      getsPersonalized: body.gets_recommendations,
+      hometown: body.zipCode,
+      lat: body.latitude,
+      long: body.longitude
+    };
+    handleUser(userObj, done);
+  },
+  sqs: new AWS.SQS()
+});
+ 
+usersSQS.on('error', (err) => {
+  console.log(err.message);
+});
+ 
+usersSQS.start();
+console.log('listening for SQS messages from user profiler...');
 
 server.listen(config.port, () => {
   console.log(`(>^.^)> Server now listening on ${config.port}!`);
