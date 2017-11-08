@@ -1,10 +1,12 @@
 const elasticSearch = require('../database/restaurantdb.js');
 
 var restaurantArr = [];
+var count = 0;
 
 const addRestaurant = function(restaurantObj, done) {
+  count++;
   restaurantArr.push(restaurantObj);
-  if (restaurantArr.length === 1000) {
+  if (restaurantArr.length === 1000 || count === 101378) {
     makeBulkRestaurant(done);
   } else {
     done();
@@ -16,14 +18,17 @@ const makeBulkRestaurant = function(done) {
 
   for (let i = 0; i < restaurantArr.length; i++) {
     let restaurantMethod = {
-      'create': {
+      'update': {
         '_index': 'restaurantprod',
         '_type': 'restaurant',
         '_id': restaurantArr[i].id
       }
     };
+    let elasticSearchObj = {
+      'doc': restaurantArr[i]
+    };
     bulk.push(restaurantMethod);
-    bulk.push(restaurantArr[i]);
+    bulk.push(elasticSearchObj);
   }
 
   elasticSearch.bulk({

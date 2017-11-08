@@ -56,6 +56,7 @@ app.get('/hello', (req, res) => {
   res.status(200).send('hello');
 });
 
+//Restaurant details need to be updated from Restaurant Inventory Service on a regular basis
 const restaurantSQS = Consumer.create({
   queueUrl: 'https://sqs.us-west-1.amazonaws.com/213354805027/appserver',
   batchSize: 10,
@@ -86,31 +87,32 @@ restaurantSQS.on('error', (err) => {
 restaurantSQS.start();
 console.log('listening for SQS messages from restaurant profiler...');
 
-const usersSQS = Consumer.create({
-  queueUrl: 'https://sqs.us-west-1.amazonaws.com/321889521012/usersToAnalytics',
-  batchSize: 10,
-  handleMessage: (message, done) => {
-    let body = JSON.parse(message.Body);
+//Users are grabbed from message bus so that user database can be populated. User database is used to generate random queries for simulation purposes.
+// const usersSQS = Consumer.create({
+//   queueUrl: 'https://sqs.us-west-1.amazonaws.com/321889521012/usersToAnalytics',
+//   batchSize: 10,
+//   handleMessage: (message, done) => {
+//     let body = JSON.parse(message.Body);
 
-    let userObj = {
-      id: body.numId,
-      name: body.name,
-      getsPersonalized: body.gets_recommendations,
-      hometown: body.zipCode,
-      lat: body.latitude,
-      long: body.longitude
-    };
-    handleUser(userObj, done);
-  },
-  sqs: new AWS.SQS()
-});
+//     let userObj = {
+//       id: body.numId,
+//       name: body.name,
+//       getsPersonalized: body.gets_recommendations,
+//       hometown: body.zipCode,
+//       lat: body.latitude,
+//       long: body.longitude
+//     };
+//     handleUser(userObj, done);
+//   },
+//   sqs: new AWS.SQS()
+// });
  
-usersSQS.on('error', (err) => {
-  console.log(err.message);
-});
+// usersSQS.on('error', (err) => {
+//   console.log(err.message);
+// });
  
-usersSQS.start();
-console.log('listening for SQS messages from user profiler...');
+// usersSQS.start();
+// console.log('listening for SQS messages from user profiler...');
 
 server.listen(config.port, () => {
   console.log(`(>^.^)> Server now listening on ${config.port}!`);
