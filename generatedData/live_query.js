@@ -11,7 +11,7 @@ const randomDate = function(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-const generateQuery = function (count) {
+const generateQuery = function () {
   let startTime = new Date();
   let logid = shortid.generate();
   logger.log({
@@ -24,12 +24,9 @@ const generateQuery = function (count) {
     success: true,
     logid: logid
   });
-  if (count > 10000) {
-    return;
-  }
-  count++;
 
-  let userIndex = Math.floor(Math.random() * 10432841);
+
+  let userIndex = Math.floor(Math.random() * 494800);
 
   db.User.findOne({
     where: {
@@ -37,6 +34,10 @@ const generateQuery = function (count) {
     }
   })
     .then((user) => {
+      if (!user) {
+        throw new Error ('user not found');
+      }
+
       logger.log({
         level: 'info',
         type: 'query',
@@ -52,7 +53,7 @@ const generateQuery = function (count) {
       let date = randomDate(new Date(2017, 6, 1), new Date());
       let randomQuery = restaurantCats[Math.floor(Math.random() * restaurantCats.length)];
 
-
+      
       let query = {
         id: shortid.generate(),
         searchTerm: randomQuery,
@@ -76,8 +77,8 @@ const generateQuery = function (count) {
       });
       let options = {
         'method': 'GET',
-        //'uri': 'http://13.57.4.100/searchRestaurants',
-        'uri': 'http://127.0.0.1:2424/searchRestaurants',
+        'uri': 'http://13.57.4.100/searchRestaurants',
+        //'uri': 'http://127.0.0.1:2424/searchRestaurants',
         'qs': {
           searchTerm: query.searchTerm,
           location: query.location,
@@ -98,8 +99,6 @@ const generateQuery = function (count) {
         success: true,
         logid: logid
       });
-      console.log('starting next round...', count);
-      generateQuery(count);
     })
     .catch((err) => {
       logger.log({
@@ -112,9 +111,14 @@ const generateQuery = function (count) {
         success: false,
         logid: logid
       });
-      console.log('there was error with user lookup ', userIndex);
-      generateQuery(count);
+      console.log('there was error with user lookup ', err);
     });
 };
 
-generateQuery(0);
+var count = 0;
+
+setInterval(function() {
+  count++;
+  console.log('live query count: ', count);
+  generateQuery();
+

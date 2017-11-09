@@ -17,7 +17,7 @@ let getRandomRestaurant = () => {
   let a = new Date().getTime().toString();
   return new Promise((resolve, reject) => {
     restaurantList.search({
-      index: 'restaurant',
+      index: 'restaurantprod',
       size: 10,
       body: { query: {
         function_score: {

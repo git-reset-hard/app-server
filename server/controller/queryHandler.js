@@ -116,7 +116,7 @@ const handleQuery = function (req, res) {
         //query elasticsearch restaurantDB for generic list which matches query
         //query below prioritizes searchTerm over zipcode (this can be easily adjusted by changing boost values)
         return restaurantList.search({
-          index: 'restaurant',
+          index: 'restaurantprod',
           size: 10,
           body: {
             query: {
@@ -247,7 +247,7 @@ const handleQuery = function (req, res) {
       let restaurantArr = [];
 
       let queryMethod = {
-        index: 'restaurant'
+        index: 'restaurantprod'
       };
 
       for (let i = 1; i <= 10; i++) {

@@ -4,9 +4,9 @@ var restaurantArr = [];
 var count = 0;
 
 const addRestaurant = function(restaurantObj, done) {
-  count++;
+
   restaurantArr.push(restaurantObj);
-  if (restaurantArr.length === 1000 || count === 101378) {
+  if (restaurantArr.length === 100) {
     makeBulkRestaurant(done);
   } else {
     done();
@@ -18,17 +18,17 @@ const makeBulkRestaurant = function(done) {
 
   for (let i = 0; i < restaurantArr.length; i++) {
     let restaurantMethod = {
-      'update': {
+      'create': {
         '_index': 'restaurantprod',
         '_type': 'restaurant',
         '_id': restaurantArr[i].id
       }
     };
-    let elasticSearchObj = {
-      'doc': restaurantArr[i]
-    };
+    // let elasticSearchObj = {
+    //   'doc': restaurantArr[i]
+    // };
     bulk.push(restaurantMethod);
-    bulk.push(elasticSearchObj);
+    bulk.push(restaurantArr[i]);
   }
 
   elasticSearch.bulk({

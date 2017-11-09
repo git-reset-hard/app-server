@@ -6,5 +6,4 @@ const client = new elasticsearch.Client({
 
 
 
-
 module.exports = client;
